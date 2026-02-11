@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -42,18 +43,14 @@
         #results {
             margin-top: 20px;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 12px;
+        .output-box {
             background: white;
-        }
-        th, td {
+            padding: 12px;
             border: 1px solid #ddd;
-            padding: 8px;
-        }
-        th {
-            background: #f1f1f1;
+            border-radius: 6px;
+            font-family: monospace;
+            line-height: 1.6;
+            word-wrap: break-word;
         }
     </style>
 </head>
@@ -65,6 +62,7 @@
 <textarea id="inputText" placeholder="Paste LinkedIn results here..."></textarea><br>
 
 <button class="btn" onclick="extractNames()">🔍 Extract Names</button>
+<button class="btn" onclick="copyNames()">📋 Copy</button>
 <button class="btn download" onclick="downloadCSV()" style="display:none;" id="downloadBtn">💾 Download CSV</button>
 
 <div id="results"></div>
@@ -89,21 +87,22 @@
 
         names = [...new Set(names)];
 
-        const table = `
+        const output = `
             <h3>✅ ${names.length} Names Extracted:</h3>
-            <table>
-                <thead>
-                    <tr><th>#</th><th>Name</th></tr>
-                </thead>
-                <tbody>
-                    ${names.map((name, i) => `<tr><td>${i+1}</td><td>${name}</td></tr>`).join('')}
-                </tbody>
-            </table>
+            <div class="output-box">
+                ${names.join(', ')}
+            </div>
         `;
 
-        document.getElementById('results').innerHTML = table;
+        document.getElementById('results').innerHTML = output;
         document.getElementById('downloadBtn').style.display = names.length > 0 ? 'inline-block' : 'none';
         window.extractedNames = names;
+    }
+
+    function copyNames() {
+        if (!window.extractedNames?.length) return alert("Extract names first");
+        navigator.clipboard.writeText(window.extractedNames.join(', '));
+        alert("Names copied!");
     }
 
     function downloadCSV() {
