@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedIn Name Extractor</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        textarea { width: 100%; height: 300px; font-family: monospace; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; cursor: pointer; margin: 10px 5px; }
+        button:hover { background: #0056b3; }
+        #results { margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f2f2f2; }
+        .download { background: #28a745 !important; }
+    </style>
+</head>
+<body>
+<h1>🚀 LinkedIn Name Extractor</h1>
+<p>Paste LinkedIn search results. Extracts names only!</p>
+
+<textarea id="inputText" placeholder="Paste here..."></textarea><br>
+
+<button onclick="extractNames()">🔍 Extract Names</button>
+<button class="download" onclick="downloadCSV()" style="display:none;" id="downloadBtn">💾 Download CSV</button>
+
+<div id="results"></div>
+
+<script>
+    function extractNames() {
+        const text = document.getElementById('inputText').value;
+        const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
+
+        let names = [];
+
+        lines.forEach(line => {
+            // Match: "Name • 2nd" or "Name • 1st" or "Name • 3rd"
+            const match = line.match(/^([A-Za-z\s]+)\s*•\s*(1st|2nd|3rd)/);
+            if (match) {
+                const name = match[1].trim();
+                if (name.length > 2) {
+                    names.push(name);
+                }
+            }
+        });
+
+        names = [...new Set(names)];
+
+        const table = `
+                <h3>✅ ${names.length} Names Extracted:</h3>
+                <table>
+                    <thead><tr><th>#</th><th>Name</th></tr></thead>
+                    <tbody>${names.map((name, i) => `<tr><td>${i+1}</td><td>${name}</td></tr>`).join('')}</tbody>
+                </table>
+            `;
+
+        document.getElementById('results').innerHTML = table;
+        document.getElementById('downloadBtn').style.display = names.length > 0 ? 'inline-block' : 'none';
+        window.extractedNames = names;
+    }
+
+    function downloadCSV() {
+        if (!window.extractedNames?.length) return alert('Extract first!');
+        const csv = 'Name\n' + window.extractedNames.map(name => `"${name.replace(/"/g, '""')}"`).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `linkedin-names-${window.extractedNames.length}.csv`;
+        a.click();
+    }
+</script>
+</body>
+</html>
